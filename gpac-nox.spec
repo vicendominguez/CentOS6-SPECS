@@ -27,6 +27,7 @@ Patch1:      gpac-0.5.0-libdir.patch
 Patch2:      gpac-0.4.5-amr.patch
 Patch3:      gpac-patch-ffmpeg-2.0.diff
 BuildRoot:   %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
+Requires:    mesa-libGL
 PreReq:      gpac-libs = 0.5.0
 
 #BuildRequires:  ImageMagick
@@ -329,7 +330,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Wed Dec 12 2013 Vicente Dominguez <twitter:@vicendominguez> - 0.5.0-2_noX
-- Spec modified: ffmpeg_int 2.0.2 patch + Without X dependencies
+- Spec modified: ffmpeg_int 2.0.2 patch + Without X dependencies + no mozilla
 
 * Sat Jun 23 2012 Nicolas Chauvet <kwizart@gmail.com> - 0.5.0-1
 - Update to 0.5.0
