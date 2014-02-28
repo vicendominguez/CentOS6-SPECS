@@ -1,3 +1,5 @@
+# Original from https://github.com/remicollet/remirepo/blob/master/mydumper/mydumper.spec
+
 Name:           mydumper
 Version:        0.6.0
 Release:        1%{?dist}
