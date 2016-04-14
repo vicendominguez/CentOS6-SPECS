@@ -1,8 +1,12 @@
+%global bmdsdk_path /tmp/Blackmagic_DeckLink_SDK_10.6.1/Linux/include/
+# you need to unzip Blackmagic_DeckLink_SDK_10.1.1.zip to Blackmagic_DeckLink_SDK_10.1.1 directory name in /tmp
+
 %define srcname ffmpeg
+%define bmd %{srcname}-blackmagic
 
+%{?_with_nodist:Name:  %{bmd}-nodist}
+%{!?_with_nodist:Name: %{bmd}}
 
-%{?_with_nodist:Name:  %{srcname}-nodist}
-%{!?_with_nodist:Name: %{srcname}}
 Summary:       Hyper fast MPEG1/MPEG4/H263/RV and AC3/MPEG audio encoder + fdk_aac + x264 + x265
 Version:       2.8.6
 Release:       1%{?dist}
@@ -56,7 +60,7 @@ BuildRequires: fdk-aac-devel
 BuildRequires: faac-devel
 }
 Requires:      %{name}-libs = %{version}-%{release}
-Requires: 	libvpx >= 1.3.0
+Requires:       libvpx >= 1.3.0
 
 %package libs
 Summary:        Library for ffmpeg
@@ -150,7 +154,11 @@ test -f version.h || echo "#define FFMPEG_VERSION \"%{evr}\"" > version.h
    --disable-stripping \
    --extra-libs="-lstdc++" \
    --enable-libfdk-aac \
-   --enable-nonfree
+   --enable-nonfree \
+   --enable-decklink \
+   --extra-cflags=-I%{bmdsdk_path} \
+   --extra-ldflags=-L%{bmdsdk_path}
+
 make
 # remove some zero-length files, ...
 pushd doc
@@ -199,6 +207,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Wed Apr 13 2016 Vicente Dominguez <twitter:@vicendominguez> - 2.8.6
+- FFmpeg-blackmagic 2.8.6 DecLink SDK + libx265 libx264 fdk-aac 3.1
+
 * Tue Dec 20 2015 Vicente Dominguez <twitter:@vicendominguez> - 2.8.4
 - FFmpeg 2.8.4 libx265 libx264 fdk-aac 3.1
 

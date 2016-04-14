@@ -1,6 +1,6 @@
 Summary:	Open Source H265/HEVC video encoder
 Name:		x265
-Version:	1.8
+Version:	1.9
 Release:	1
 License:	GPL v2
 Group:		Libraries
@@ -28,7 +28,7 @@ Requires:	libx265 = %{version}-%{release}
 This is the package containing the header files for x265 library.
 
 %prep
-%setup -qn x265_11047
+%setup -qn %{name}_%{version}
 
 %build
 cd build/linux
