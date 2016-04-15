@@ -9,7 +9,7 @@
 
 Summary:       Hyper fast MPEG1/MPEG4/H263/RV and AC3/MPEG audio encoder + fdk_aac + x264 + x265
 Version:       2.8.6
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       GPLv3+
 Group:         System Environment/Libraries
 

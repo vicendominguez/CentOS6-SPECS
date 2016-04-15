@@ -199,6 +199,9 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Fri Apr 15 2016 Vicente Dominguez <twitter:@vicendominguez> - 2.8.6
+- FFmpeg 2.8.6 libx265 libx264 fdk-aac 3.1
+
 * Tue Dec 20 2015 Vicente Dominguez <twitter:@vicendominguez> - 2.8.4
 - FFmpeg 2.8.4 libx265 libx264 fdk-aac 3.1
 
