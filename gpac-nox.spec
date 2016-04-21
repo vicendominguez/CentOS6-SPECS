@@ -1,42 +1,22 @@
-# Todo:  - Patch-in xulrunner support within configure with pkg-config support.
-#        - Add pkg-config support for libs detection.
-#        - Add pkg-config support generated form configure for gpac (same as ffmpeg).
-#        - Make it support swscaler enabled ffmpeg (at least test it - upstream).
-#        - Debug Osmo4 (don't even work).
-#        - Submit and import patches upstream.
-#        - Fix unused-direct-shlib-dependency on libgpac
-
-%global osmo          Osmo4
-#global svn           20120623
-# Mozilla stuff fails. It's completely disabled for now.
-%global mozver        3.0
-%global geckover      2.0.0
-%global xuldir        %{_datadir}/idl/xulrunner-sdk-%{geckover}
-%global xulbindir     %{_libdir}/xulrunner-%{geckover}
-
 Name:        gpac
 Summary:     MPEG-4 multimedia framework
-Version:     0.5.0
-Release:     2_noX%{?svn}%{?dist}
+Version:     0.6.1
+Release:     1_noX%{?dist}
 License:     LGPLv2+
 Group:       System Environment/Libraries
 URL:         http://gpac.sourceforge.net/
 Source0:     http://downloads.sourceforge.net/gpac/gpac-%{version}.tar.gz
-Source9:     gpac-snapshot.sh
-Patch1:      gpac-0.5.0-libdir.patch
-Patch2:      gpac-0.4.5-amr.patch
-Patch3:      gpac-patch-ffmpeg-2.0.diff
-BuildRoot:   %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
+#Source9:     gpac-snapshot.sh
+#Patch1:      gpac-0.5.0-libdir.patch
+#Patch2:      gpac-0.4.5-amr.patch
+#Patch3:      gpac-patch-ffmpeg-2.0.diff
+#BuildRoot:   %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:    mesa-libGL
-PreReq:      gpac-libs = 0.5.0
+#PreReq:      gpac-libs = 0.6.1
 
-#BuildRequires:  ImageMagick
 BuildRequires:  SDL-devel
 BuildRequires:  a52dec-devel
-#BuildRequires:  librsvg2-devel >= 2.5.0
 BuildRequires:  libGLU-devel
-#BuildRequires:  freeglut-devel
-#BuildRequires:  freetype-devel >= 2.1.4
 BuildRequires:  faad2-devel
 BuildRequires:  libjpeg-devel
 BuildRequires:  libpng-devel >= 1.2.5
@@ -50,17 +30,8 @@ BuildRequires:  openjpeg-devel
 BuildRequires:  pulseaudio-libs-devel
 BuildRequires:  zlib-devel
 BuildRequires:  libogg-devel libvorbis-devel libtheora-devel
-#BuildRequires:  libXt-devel
-#BuildRequires:  libXpm-devel
-#BuildRequires:  libXv-devel
-#BuildRequires:  wxGTK-devel
-#BuildRequires:  xmlrpc-c-devel
-%{?_with_mozilla:BuildRequires: gecko-devel}
 BuildRequires:  doxygen
-#BuildRequires:  desktop-file-utils
 %{?_with_amr:BuildRequires: amrnb-devel amrwb-devel}
-#BuildRequires:  gtk+-devel
-#BuildRequires:  gtk2-devel
 
 %description
 GPAC is a multimedia framework based on the MPEG-4 Systems standard developed
@@ -90,14 +61,6 @@ Requires: %{name}-libs = %{version}-%{release}
 Development libraries and files for gpac.
 
 
-%package  doc
-Summary:  Documentation for %{name}
-Group:    Documentation
-
-%description  doc
-Documentation for %{name}.
-
-
 %package  devel-static
 Summary:  Development libraries and files for %{name}
 Group:    Development/Libraries
@@ -107,45 +70,11 @@ Requires: %{name}-devel = %{version}-%{release}
 %description  devel-static
 Static library for gpac.
 
-%{?_with_osmo:
-%package -n  %{osmo}
-Summary:  Media player based on gpac
-Group:    Applications/Multimedia
-
-%description -n %{osmo}
-Osmo4 is an MPEG-4 player with the following features:
-* MPEG-4 Systems player
-* Optimized 2D graphics renderer compliant with the Complete2D Scene Graph
-  and Graphics profiles
-* Video and audio presentation achieved through plugins
-* Multimedia player features:
-  * Timeline controls: play, pause, step.
-  * Graphics features: antialising, zoom and pan, scalable resizing of
-    rendering area, basic full screen support.
-  * Support for Advanced Text and Graphics extension of MPEG-4 Systems
-    under standardization.
-  * Frame export to JPG, PNG, BMP.
-}
-
-%{?_with_mozilla:
-%package -n mozilla-%{osmo}
-Summary:  Osmo Media Player plugin for Mozilla compatible web browsers
-Group:    Applications/Multimedia  
-Requires:  %{osmo} = %{version}-%{release}
-#Requires:  firefox >= %{mozver}
-Requires:  %{_libdir}/mozilla
-
-
-%description -n mozilla-%{osmo}
-This package contains the OSMO Media Player plugin for Mozilla compatible
-web browsers.
-}
-
 %prep
-%setup -q -n gpac
-%patch1 -p1 -b .libdir
-%patch2 -p1 -b .amr
-%patch3 -p0
+%setup -q -n %{name}-%{version}
+#%patch1 -p1 -b .libdir
+#%patch2 -p1 -b .amr
+#%patch3 -p0
 
 # Fix encoding warnings
 cp -p Changelog Changelog.origine
@@ -161,52 +90,20 @@ rm -rf doc/ipmpx_syntax.bt.origine
 
 %build
 %configure \
-  --enable-debug \
   --extra-cflags="$RPM_OPT_FLAGS -fPIC -DPIC -D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -D_LARGEFILE_SOURCE=1 -D_GNU_SOURCE=1" \
-  --X11-path=%{_prefix} \
+  --enable-debug \
   --libdir=%{_lib} \
   --disable-oss-audio \
-%{?_with_mozilla:--mozdir=%{_libdir}/mozilla/plugins} \
-%{?_with_amr:--enable-amr} \
+  --disable-x11 \
   --disable-static \
-  --use-js=no
+  --use-js=no 
 
 #Avoid mess with setup.h
 cp -p config.h include/gpac
 
-##
-## Osmo-zila plugin.
-##
-%{?_with_mozilla:
-#
-# Rebuild osmozilla.xpt
-pushd applications/osmozilla
-%{xulbindir}/xpidl -m header -I%{xuldir}/stable -I%{xuldir}/unstable nsIOsmozilla.idl
-%{xulbindir}/xpidl -m typelib -I%{xuldir}/stable -I%{xuldir}/unstable nsIOsmozilla.idl
-%{xulbindir}/xpt_link nposmozilla.xpt nsIOsmozilla.xpt
-mv nsIOsmozilla.xpt nsIOsmozilla.xpt_linux
-popd 
-
-## kwizart - osmozilla parallel make fails
-# %{?_smp_mflags}
-#make -C applications/osmozilla   \
-#  OPTFLAGS="%optflags -fPIC -I%{_includedir}/nspr4/"     \
-#  INCLUDES="-I%{_datadir}/idl/firefox-%{mozver}/       \
-#    -I%{_includedir}/firefox-%{mozver}/       \
-#    -I%{_includedir}/firefox-%{mozver}/xpcom    \
-#    -I%{_includedir}/nspr4/ $INCLUDES"       \
-#  XPIDL_INCL="-I%{_datadir}/idl/firefox-%{mozver}/     \
-#    -I%{_includedir}/firefox-%{mozver}/       \
-#    -I%{_includedir}/firefox-%{mozver}/xpcom    \
-#    -I%{_includedir}/nspr4/ $INCLUDES"       \
-#  install
-}
-
 # Parallele build will fail
-make all OPTFLAGS="$RPM_OPT_FLAGS -fPIC -DPIC" 
-#{?_smp_mflags}
-make sggen OPTFLAGS="$RPM_OPT_FLAGS -fPIC -DPIC" 
-#{?_smp_mflags}
+#make all OPTFLAGS="$RPM_OPT_FLAGS -fPIC -DPIC" 
+make all
 
 ## kwizart - build doxygen doc for devel
 pushd doc
@@ -217,52 +114,15 @@ popd
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install install-lib INSTFLAGS="-p"
 
-%{?_with_mozilla:
-## kwizart - Install osmozilla plugin - make instmoz disabled.
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/mozilla/{plugins,components}
-install -m 755 bin/gcc/nposmozilla.so $RPM_BUILD_ROOT%{_libdir}/mozilla/plugins/nposmozilla.so
-install -m 755 bin/gcc/nposmozilla.xpt $RPM_BUILD_ROOT%{_libdir}/mozilla/components/nposmozilla.xpt
-}
-
-%{?_with_osmo:
-# Desktop menu Osmo4
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/applications
-cat > %{osmo}.desktop <<EOF
-[Desktop Entry]
-Name=Osmo4 Media Player
-GenericName=Media Player
-Comment=MPEG-4 Media Player
-Exec=%{osmo}
-Terminal=false
-Icon=%{osmo}
-Type=Application
-Encoding=UTF-8
-Categories=AudioVideo;Player;
-EOF
-
-desktop-file-install --vendor "" \
-  --dir $RPM_BUILD_ROOT%{_datadir}/applications \
-  --mode 644 \
-  %{osmo}.desktop
-
-#icons
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/pixmaps
-install -pm 0644 applications/osmo4_wx/osmo4.xpm $RPM_BUILD_ROOT%{_datadir}/pixmaps/%{osmo}.xpm
-}
-%{?!_with_osmo:
-rm -rf $RPM_BUILD_ROOT%{_bindir}/%{osmo}
-}
-
 #Install generated sggen binaries
-#for b in MPEG4 SVG X3D; do
-for b in MPEG4 X3D; do
-  pushd applications/generators/${b}
-    install -pm 0755 ${b}Gen $RPM_BUILD_ROOT%{_bindir}
-  popd
-done
+#for b in MPEG4 X3D; do
+#  pushd applications/generators/${b}
+#    install -pm 0755 ${b}Gen $RPM_BUILD_ROOT%{_bindir}
+#  popd
+#done
 
 #Fix doxygen timestamp
-touch -r Changelog doc/html/*
+#touch -r Changelog doc/html/*
 
 #config.h like but not only
 #Usual multilib bug https://bugzilla.rpmfusion.org/show_bug.cgi?id=270
@@ -283,39 +143,18 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS BUGS Changelog COPYING README TODO 
+%doc AUTHORS BUGS Changelog COPYING TODO 
 %{_bindir}/MP4Box
 %{_bindir}/MP4Client
-%{_bindir}/MPEG4Gen
-#{_bindir}/SVGGen
-%{_bindir}/X3DGen
 %{_datadir}/gpac/
 %{_mandir}/man1/*.1.*
+%{_bindir}/DashCast
+%{_bindir}/MP42TS
 
 %files libs
 %defattr(-,root,root,-)
 %{_libdir}/libgpac.so.*
 %{_libdir}/gpac/
-
-%{?_with_osmo:
-%files -n %{osmo}
-%defattr(-,root,root,-)
-%doc AUTHORS BUGS COPYING README TODO
-%{_bindir}/Osmo4
-%{_datadir}/applications/*.desktop
-%{_datadir}/pixmaps/%{osmo}.xpm
-}
-
-%{?_with_mozilla:
-%files -n mozilla-%{osmo}
-%defattr(-,root,root,-)
-%{_libdir}/mozilla/plugins/nposmozilla.so
-%{_libdir}/mozilla/components/nposmozilla.xpt
-}
-
-%files doc
-%defattr(-,root,root,-)
-%doc doc/html/*
 
 %files devel
 %defattr(-,root,root,-)
@@ -329,6 +168,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Apr 18 2016 Vicente Dominguez <twitter:@vicendominguez> - 0.6.0-1_noX
+- Spec modified: standard compilation but without X support and  no mozilla
+
 * Wed Dec 12 2013 Vicente Dominguez <twitter:@vicendominguez> - 0.5.0-2_noX
 - Spec modified: ffmpeg_int 2.0.2 patch + Without X dependencies + no mozilla
 
