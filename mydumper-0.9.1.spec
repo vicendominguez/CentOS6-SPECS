@@ -8,7 +8,7 @@ Summary:        A high-performance MySQL backup tool
 Group:          Applications/Databases
 License:        GPLv3+
 URL:            http://www.mydumper.org/
-Source0:        http://launchpad.net/mydumper/0.6/%{version}/+download/%{name}-%{version}.tar.gz
+Source0:        http://launchpad.net/mydumper/0.9/%{version}/+download/%{name}-%{version}.tar.gz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  glib2-devel mysql-devel zlib-devel pcre-devel
